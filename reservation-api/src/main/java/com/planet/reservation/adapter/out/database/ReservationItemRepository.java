@@ -1,6 +1,6 @@
 package com.planet.reservation.adapter.out.database;
 
-import com.planet.reservation.application.ports.out.ReservationItemDatabasePort;
+import com.planet.reservation.application.ports.out.database.ReservationItemDatabasePort;
 import com.planet.reservation.domain.entities.ReservationItemEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

@@ -1,7 +1,7 @@
 package com.planet.reservation.application.ports.in;
 
 import com.planet.reservation.application.exceptions.NotFoundException;
-import com.planet.reservation.application.ports.out.UserDatabasePort;
+import com.planet.reservation.application.ports.out.database.UserDatabasePort;
 import com.planet.reservation.domain.entities.UserEntity;
 import org.springframework.stereotype.Service;
 

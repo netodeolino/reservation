@@ -11,3 +11,14 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: admin
+    password: admin
+
+app:
+  queue:
+    producer:
+      emailNotificationReservationQueue: email.notification.reservation.queue

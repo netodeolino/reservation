@@ -1,4 +1,4 @@
-package com.planet.reservation.application.ports.out;
+package com.planet.reservation.application.ports.out.database;
 
 import com.planet.reservation.domain.entities.BookEntity;
 

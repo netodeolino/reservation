@@ -30,5 +30,22 @@ services:
       timeout: 5s
       retries: 5
 
+  reservation-rabbitmq:
+    image: rabbitmq:3.12-management
+    container_name: reservation-rabbitmq
+    restart: unless-stopped
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin
+      RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS: "-rabbitmq_management load_definitions \"/etc/rabbitmq/definitions.json\""
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+      - ./infrastructure/rabbitmq-definitions.json:/etc/rabbitmq/definitions.json
+
 volumes:
   pgdata:
+  rabbitmq_data:
+    driver: local

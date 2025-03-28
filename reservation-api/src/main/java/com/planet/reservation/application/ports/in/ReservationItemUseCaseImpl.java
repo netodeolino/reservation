@@ -1,7 +1,7 @@
 package com.planet.reservation.application.ports.in;
 
 import com.planet.reservation.application.exceptions.ConflictException;
-import com.planet.reservation.application.ports.out.ReservationItemDatabasePort;
+import com.planet.reservation.application.ports.out.database.ReservationItemDatabasePort;
 import com.planet.reservation.domain.dto.request.BookRequest;
 import com.planet.reservation.domain.dto.request.ReservationRequest;
 import com.planet.reservation.domain.entities.BookEntity;

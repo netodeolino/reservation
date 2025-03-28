@@ -1,0 +1,32 @@
+{
+    "rabbit_version": "3.12",
+    "users": [
+      {
+        "name": "admin",
+        "password": "admin",
+        "tags": "administrator"
+      }
+    ],
+    "vhosts": [
+      {
+        "name": "/"
+      }
+    ],
+    "permissions": [
+      {
+        "user": "admin",
+        "vhost": "/",
+        "configure": ".*",
+        "write": ".*",
+        "read": ".*"
+      }
+    ],
+    "queues": [
+      {
+        "name": "email.notification.reservation.queue",
+        "vhost": "/",
+        "durable": true
+      }
+    ]
+  }
+  

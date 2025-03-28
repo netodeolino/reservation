@@ -2,7 +2,9 @@ package com.planet.reservation.application.ports.in;
 
 import com.planet.reservation.application.exceptions.NotFoundException;
 import com.planet.reservation.application.exceptions.UnprocessableException;
-import com.planet.reservation.application.ports.out.ReservationDatabasePort;
+import com.planet.reservation.application.ports.out.database.ReservationDatabasePort;
+import com.planet.reservation.application.ports.out.queue.ReservationQueuePort;
+import com.planet.reservation.domain.dto.queue.ReservationQueueMessage;
 import com.planet.reservation.domain.dto.request.BookRequest;
 import com.planet.reservation.domain.dto.request.ReservationRequest;
 import com.planet.reservation.domain.dto.response.ReservationResponse;
@@ -28,6 +30,7 @@ public class ReservationUseCaseImpl implements ReservationUseCase {
     private final ReservationItemUseCase reservationItemUseCase;
     private final BookUseCase bookUseCase;
     private final UserUseCase userUseCase;
+    private final ReservationQueuePort reservationQueuePort;
 
     private static final Logger log = LogManager.getLogger(ReservationUseCaseImpl.class);
 
@@ -38,12 +41,14 @@ public class ReservationUseCaseImpl implements ReservationUseCase {
             ReservationDatabasePort reservationDatabasePort,
             ReservationItemUseCase reservationItemUseCase,
             BookUseCase bookUseCase,
-            UserUseCase userUseCase
+            UserUseCase userUseCase,
+            ReservationQueuePort reservationQueuePort
     ) {
         this.reservationDatabasePort = reservationDatabasePort;
         this.reservationItemUseCase = reservationItemUseCase;
         this.bookUseCase = bookUseCase;
         this.userUseCase = userUseCase;
+        this.reservationQueuePort = reservationQueuePort;
     }
 
     @Override
@@ -124,6 +129,9 @@ public class ReservationUseCaseImpl implements ReservationUseCase {
         processReservationItems(reservationRequest, reservationEntity);
 
         ReservationEntity savedReservationEntity = reservationDatabasePort.save(reservationEntity);
+
+        reservationQueuePort.send(ReservationQueueMessage.fromEntity(savedReservationEntity));
+
         return ReservationResponse.fromEntity(savedReservationEntity);
     }
 

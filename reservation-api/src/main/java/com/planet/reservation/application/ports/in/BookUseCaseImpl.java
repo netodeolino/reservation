@@ -1,6 +1,6 @@
 package com.planet.reservation.application.ports.in;
 
-import com.planet.reservation.application.ports.out.BookDatabasePort;
+import com.planet.reservation.application.ports.out.database.BookDatabasePort;
 import com.planet.reservation.domain.entities.BookEntity;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;

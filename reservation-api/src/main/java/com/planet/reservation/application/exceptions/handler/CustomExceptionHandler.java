@@ -20,13 +20,26 @@ public class CustomExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @ExceptionHandler(value = {
-            ConstraintViolationException.class,
-            UnprocessableException.class,
-            IllegalStateException.class,
-            IllegalArgumentException.class
-    })
+    @ExceptionHandler(value = { ConstraintViolationException.class })
     public final ResponseEntity<Object> handleConstraintViolationException(ConstraintViolationException ex) {
+        ApiResponse<?> response = new ApiResponse<>(HttpStatus.UNPROCESSABLE_ENTITY.value(), ex.getMessage(), null, null);
+        return new ResponseEntity<>(response, HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+
+    @ExceptionHandler(value = { UnprocessableException.class })
+    public final ResponseEntity<Object> handleUnprocessableException(UnprocessableException ex) {
+        ApiResponse<?> response = new ApiResponse<>(HttpStatus.UNPROCESSABLE_ENTITY.value(), ex.getMessage(), null, null);
+        return new ResponseEntity<>(response, HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+
+    @ExceptionHandler(value = { IllegalStateException.class })
+    public final ResponseEntity<Object> handleIllegalStateException(IllegalStateException ex) {
+        ApiResponse<?> response = new ApiResponse<>(HttpStatus.UNPROCESSABLE_ENTITY.value(), ex.getMessage(), null, null);
+        return new ResponseEntity<>(response, HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+
+    @ExceptionHandler(value = { IllegalArgumentException.class })
+    public final ResponseEntity<Object> handleIllegalArgumentException(IllegalArgumentException ex) {
         ApiResponse<?> response = new ApiResponse<>(HttpStatus.UNPROCESSABLE_ENTITY.value(), ex.getMessage(), null, null);
         return new ResponseEntity<>(response, HttpStatus.UNPROCESSABLE_ENTITY);
     }
