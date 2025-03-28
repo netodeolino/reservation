@@ -1,12 +1,8 @@
 package com.planet.reservation.application.ports.in;
 
-import com.planet.reservation.application.exceptions.ConflictException;
 import com.planet.reservation.application.exceptions.NotFoundException;
 import com.planet.reservation.application.exceptions.UnprocessableException;
-import com.planet.reservation.application.ports.out.BookDatabasePort;
 import com.planet.reservation.application.ports.out.ReservationDatabasePort;
-import com.planet.reservation.application.ports.out.ReservationItemDatabasePort;
-import com.planet.reservation.application.ports.out.UserDatabasePort;
 import com.planet.reservation.domain.dto.request.BookRequest;
 import com.planet.reservation.domain.dto.request.ReservationRequest;
 import com.planet.reservation.domain.dto.response.ReservationResponse;
@@ -15,7 +11,6 @@ import com.planet.reservation.domain.entities.ReservationEntity;
 import com.planet.reservation.domain.entities.ReservationItemEntity;
 import com.planet.reservation.domain.entities.UserEntity;
 import com.planet.reservation.domain.enums.ReservationStatusEnum;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.OptimisticLockException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -30,26 +25,25 @@ import java.util.List;
 @Service
 public class ReservationUseCaseImpl implements ReservationUseCase {
     private final ReservationDatabasePort reservationDatabasePort;
-    private final ReservationItemDatabasePort reservationItemDatabasePort;
-    private final BookDatabasePort bookDatabasePort;
-    private final UserDatabasePort userDatabasePort;
+    private final ReservationItemUseCase reservationItemUseCase;
+    private final BookUseCase bookUseCase;
+    private final UserUseCase userUseCase;
 
     private static final Logger log = LogManager.getLogger(ReservationUseCaseImpl.class);
 
-    private static final int MAX_NUMBER_OF_BOOKS_AT_TIME = 3;
     private static final int MAX_RESERVATION_ATTEMPTS = 3;
     private static final int DAYS_TO_EXPIRE_RESERVATION = 7;
 
     public ReservationUseCaseImpl(
             ReservationDatabasePort reservationDatabasePort,
-            ReservationItemDatabasePort reservationItemDatabasePort,
-            BookDatabasePort bookDatabasePort,
-            UserDatabasePort userDatabasePort
+            ReservationItemUseCase reservationItemUseCase,
+            BookUseCase bookUseCase,
+            UserUseCase userUseCase
     ) {
         this.reservationDatabasePort = reservationDatabasePort;
-        this.reservationItemDatabasePort = reservationItemDatabasePort;
-        this.bookDatabasePort = bookDatabasePort;
-        this.userDatabasePort = userDatabasePort;
+        this.reservationItemUseCase = reservationItemUseCase;
+        this.bookUseCase = bookUseCase;
+        this.userUseCase = userUseCase;
     }
 
     @Override
@@ -96,7 +90,7 @@ public class ReservationUseCaseImpl implements ReservationUseCase {
         for (ReservationItemEntity reservationItemEntity : reservationEntity.getItems()) {
             BookEntity bookEntity = reservationItemEntity.getBook();
             bookEntity.setTotalAvailable(bookEntity.getTotalAvailable() + reservationItemEntity.getQuantity());
-            bookDatabasePort.save(bookEntity);
+            bookUseCase.save(bookEntity);
         }
     }
 
@@ -122,20 +116,15 @@ public class ReservationUseCaseImpl implements ReservationUseCase {
     }
 
     private ReservationResponse executeReservation(ReservationRequest reservationRequest) {
-        validateNumberOfBooks(reservationRequest);
+        reservationItemUseCase.validateNumberOfBooks(reservationRequest);
 
-        UserEntity userEntity = findUserOrThrow(reservationRequest.userId());
+        UserEntity userEntity = userUseCase.findById(reservationRequest.userId());
         ReservationEntity reservationEntity = createInitialReservation(userEntity);
 
         processReservationItems(reservationRequest, reservationEntity);
 
         ReservationEntity savedReservationEntity = reservationDatabasePort.save(reservationEntity);
         return ReservationResponse.fromEntity(savedReservationEntity);
-    }
-
-    private UserEntity findUserOrThrow(Long userId) {
-        return userDatabasePort.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User not found"));
     }
 
     private ReservationEntity createInitialReservation(UserEntity userEntity) {
@@ -157,22 +146,17 @@ public class ReservationUseCaseImpl implements ReservationUseCase {
     }
 
     private ReservationItemEntity processBookReservation(BookRequest bookRequest, ReservationEntity reservation) {
-        BookEntity bookEntity = findBookOrThrow(bookRequest.bookId());
+        BookEntity bookEntity = bookUseCase.findById(bookRequest.bookId());
 
-        validateBookAvailability(bookEntity, bookRequest);
+        reservationItemUseCase.validateBookAvailability(bookEntity, bookRequest);
         updateBookAvailability(bookEntity, bookRequest.quantity());
 
         return buildReservationItem(bookEntity, reservation, bookRequest.quantity());
     }
 
-    private BookEntity findBookOrThrow(Long bookId) {
-        return bookDatabasePort.findById(bookId)
-                .orElseThrow(() -> new EntityNotFoundException("Book not found"));
-    }
-
     private void updateBookAvailability(BookEntity bookEntity, int quantity) {
         bookEntity.setTotalAvailable(bookEntity.getTotalAvailable() - quantity);
-        bookDatabasePort.save(bookEntity);
+        bookUseCase.save(bookEntity);
     }
 
     private ReservationItemEntity buildReservationItem(BookEntity bookEntity, ReservationEntity reservation, int quantity) {
@@ -181,27 +165,6 @@ public class ReservationUseCaseImpl implements ReservationUseCase {
                 .reservation(reservation)
                 .quantity(quantity)
                 .build();
-    }
-
-    private void validateNumberOfBooks(ReservationRequest reservationRequest) {
-        int currentReservations = reservationItemDatabasePort.countActiveBooksByUser(reservationRequest.userId());
-
-        int quantityRequested = reservationRequest.books().stream()
-                .mapToInt(BookRequest::quantity)
-                .sum();
-
-        if (quantityRequested + currentReservations > MAX_NUMBER_OF_BOOKS_AT_TIME) {
-            throw new ConflictException("User has exceeded max number of books: " + MAX_NUMBER_OF_BOOKS_AT_TIME);
-        }
-    }
-
-    private void validateBookAvailability(BookEntity bookEntity, BookRequest bookRequest) {
-        int reservedCount = reservationItemDatabasePort.countReservedBooksByBook(bookEntity.getId());
-        int availableToReserve = bookEntity.getTotalAvailable() - reservedCount;
-
-        if (bookRequest.quantity() > availableToReserve) {
-            throw new IllegalArgumentException("Book '" + bookEntity.getTitle() + "' does not have enough stock for reservation");
-        }
     }
 
 }
