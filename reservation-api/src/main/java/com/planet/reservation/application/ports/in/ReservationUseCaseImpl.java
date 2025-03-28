@@ -97,6 +97,8 @@ public class ReservationUseCaseImpl implements ReservationUseCase {
             bookEntity.setTotalAvailable(bookEntity.getTotalAvailable() + reservationItemEntity.getQuantity());
             bookUseCase.save(bookEntity);
         }
+
+        log.info("Canceled the reservation id {}", reservationId);
     }
 
     @Override
@@ -129,6 +131,7 @@ public class ReservationUseCaseImpl implements ReservationUseCase {
         processReservationItems(reservationRequest, reservationEntity);
 
         ReservationEntity savedReservationEntity = reservationDatabasePort.save(reservationEntity);
+        log.info("Saved reservation id {} of the user id {}", savedReservationEntity.getId(), savedReservationEntity.getUser().getId());
 
         reservationQueuePort.send(ReservationQueueMessage.fromEntity(savedReservationEntity));
 
