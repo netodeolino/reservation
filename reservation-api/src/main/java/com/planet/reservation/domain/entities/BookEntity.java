@@ -30,6 +30,8 @@ public class BookEntity {
     @Version
     private Integer version;
 
+    public BookEntity() {}
+
     public Long getId() {
         return id;
     }
@@ -78,6 +80,14 @@ public class BookEntity {
         this.totalAvailable = totalAvailable;
     }
 
+    public Integer getVersion() {
+        return version;
+    }
+
+    public void setVersion(Integer version) {
+        this.version = version;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -89,5 +99,68 @@ public class BookEntity {
     @Override
     public int hashCode() {
         return Objects.hash(id, title, author, isbn, totalCopies, totalAvailable, version);
+    }
+
+    private BookEntity(Builder builder) {
+        this.id = builder.id;
+        this.title = builder.title;
+        this.author = builder.author;
+        this.isbn = builder.isbn;
+        this.totalCopies = builder.totalCopies;
+        this.totalAvailable = builder.totalAvailable;
+        this.version = builder.version;
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+        private Long id;
+        private String title;
+        private String author;
+        private String isbn;
+        private int totalCopies;
+        private int totalAvailable;
+        private Integer version;
+
+        public Builder id(Long id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder title(String title) {
+            this.title = title;
+            return this;
+        }
+
+        public Builder author(String author) {
+            this.author = author;
+            return this;
+        }
+
+        public Builder isbn(String isbn) {
+            this.isbn = isbn;
+            return this;
+        }
+
+        public Builder totalCopies(int totalCopies) {
+            this.totalCopies = totalCopies;
+            return this;
+        }
+
+        public Builder totalAvailable(int totalAvailable) {
+            this.totalAvailable = totalAvailable;
+            return this;
+        }
+
+        public Builder version(Integer version) {
+            this.version = version;
+            return this;
+        }
+
+        public BookEntity build() {
+            return new BookEntity(this);
+        }
     }
 }

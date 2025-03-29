@@ -105,6 +105,7 @@ public class ReservationEntity {
     }
 
     private ReservationEntity(Builder builder) {
+        this.id = builder.id;
         this.user = builder.user;
         this.items = builder.items;
         this.status = builder.status;
@@ -118,12 +119,18 @@ public class ReservationEntity {
     }
 
     public static class Builder {
+        private Long id;
         private UserEntity user;
         private List<ReservationItemEntity> items;
         private ReservationStatusEnum status;
         private LocalDateTime createdAt;
         private LocalDateTime expiresAt;
         private LocalDateTime pickedUpAt;
+
+        public Builder id(Long id) {
+            this.id = id;
+            return this;
+        }
 
         public Builder user(UserEntity user) {
             this.user = user;
