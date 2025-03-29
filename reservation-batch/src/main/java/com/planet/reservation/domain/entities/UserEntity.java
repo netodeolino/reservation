@@ -18,6 +18,8 @@ public class UserEntity {
     @Column(unique = true, nullable = false)
     private String email;
 
+    public UserEntity() {}
+
     public Long getId() {
         return id;
     }
@@ -53,5 +55,40 @@ public class UserEntity {
     @Override
     public int hashCode() {
         return Objects.hash(id, name, email);
+    }
+
+    private UserEntity(Builder builder) {
+        this.id = builder.id;
+        this.name = builder.name;
+        this.email = builder.email;
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+        private Long id;
+        private String name;
+        private String email;
+
+        public Builder id(Long id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder name(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public Builder email(String email) {
+            this.email = email;
+            return this;
+        }
+
+        public UserEntity build() {
+            return new UserEntity(this);
+        }
     }
 }

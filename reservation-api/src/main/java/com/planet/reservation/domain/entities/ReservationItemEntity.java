@@ -2,7 +2,6 @@ package com.planet.reservation.domain.entities;
 
 import jakarta.persistence.*;
 
-import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -72,6 +71,7 @@ public class ReservationItemEntity {
     }
 
     private ReservationItemEntity(Builder builder) {
+        this.id = builder.id;
         this.reservation = builder.reservation;
         this.book = builder.book;
         this.quantity = builder.quantity;
@@ -82,9 +82,15 @@ public class ReservationItemEntity {
     }
 
     public static class Builder {
+        private Long id;
         private ReservationEntity reservation;
         private BookEntity book;
         private int quantity;
+
+        public Builder id(Long id) {
+            this.id = id;
+            return this;
+        }
 
         public Builder reservation(ReservationEntity reservation) {
             this.reservation = reservation;
