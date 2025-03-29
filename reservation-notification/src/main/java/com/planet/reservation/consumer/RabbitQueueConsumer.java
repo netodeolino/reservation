@@ -1,6 +1,6 @@
 package com.planet.reservation.consumer;
 
-import com.planet.reservation.domain.dto.queue.ReservationQueueMessage;
+import com.planet.reservation.dto.queue.ReservationQueueMessage;
 import com.planet.reservation.properties.QueueProperties;
 import com.planet.reservation.service.ReservationService;
 import org.apache.logging.log4j.LogManager;

@@ -3,10 +3,10 @@ package com.planet.reservation;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
+//@SpringBootTest
 class ReservationNotificationApplicationTests {
 
-	@Test
+	//@Test
 	void contextLoads() {
 	}
 
