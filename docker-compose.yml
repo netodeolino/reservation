@@ -45,7 +45,25 @@ services:
       - rabbitmq_data:/var/lib/rabbitmq
       - ./infrastructure/rabbitmq-definitions.json:/etc/rabbitmq/definitions.json
 
+  reservation-redis:
+    image: redis:7.4-alpine
+    container_name: reservation-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    environment:
+      - REDIS_PASSWORD=admin
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      interval: 1s
+      timeout: 3s
+      retries: 5
+    command: ["redis-server"]
+    volumes:
+      - redis_data:/data
+
 volumes:
   pgdata:
   rabbitmq_data:
     driver: local
+  redis_data:

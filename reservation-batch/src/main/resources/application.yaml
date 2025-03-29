@@ -11,3 +11,9 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+
+app:
+  scheduling:
+    notPickedUpReservationFixed:
+      delayTime: 5000
+      expirationTime: 7

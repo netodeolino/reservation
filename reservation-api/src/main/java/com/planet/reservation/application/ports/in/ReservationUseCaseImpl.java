@@ -2,8 +2,11 @@ package com.planet.reservation.application.ports.in;
 
 import com.planet.reservation.application.exceptions.NotFoundException;
 import com.planet.reservation.application.exceptions.UnprocessableException;
+import com.planet.reservation.application.ports.out.cache.CachePort;
 import com.planet.reservation.application.ports.out.database.ReservationDatabasePort;
 import com.planet.reservation.application.ports.out.queue.ReservationQueuePort;
+import com.planet.reservation.application.properties.ReservationProperties;
+import com.planet.reservation.domain.dto.cache.CachedPage;
 import com.planet.reservation.domain.dto.queue.ReservationQueueMessage;
 import com.planet.reservation.domain.dto.request.BookRequest;
 import com.planet.reservation.domain.dto.request.ReservationRequest;
@@ -26,42 +29,69 @@ import java.util.List;
 
 @Service
 public class ReservationUseCaseImpl implements ReservationUseCase {
+    private final CachePort cachePort;
     private final ReservationDatabasePort reservationDatabasePort;
     private final ReservationItemUseCase reservationItemUseCase;
     private final BookUseCase bookUseCase;
     private final UserUseCase userUseCase;
     private final ReservationQueuePort reservationQueuePort;
+    private final ReservationProperties reservationProperties;
 
     private static final Logger log = LogManager.getLogger(ReservationUseCaseImpl.class);
 
     private static final int MAX_RESERVATION_ATTEMPTS = 3;
-    private static final int DAYS_TO_EXPIRE_RESERVATION = 7;
 
     public ReservationUseCaseImpl(
+            CachePort cachePort,
             ReservationDatabasePort reservationDatabasePort,
             ReservationItemUseCase reservationItemUseCase,
             BookUseCase bookUseCase,
             UserUseCase userUseCase,
-            ReservationQueuePort reservationQueuePort
+            ReservationQueuePort reservationQueuePort,
+            ReservationProperties reservationProperties
     ) {
+        this.cachePort = cachePort;
         this.reservationDatabasePort = reservationDatabasePort;
         this.reservationItemUseCase = reservationItemUseCase;
         this.bookUseCase = bookUseCase;
         this.userUseCase = userUseCase;
         this.reservationQueuePort = reservationQueuePort;
+        this.reservationProperties = reservationProperties;
     }
 
     @Override
     public ReservationResponse findById(Long reservationId) {
-        return reservationDatabasePort.findById(reservationId)
+        String cacheKey = "reservation:" + reservationId;
+
+        ReservationResponse cachedReservation = cachePort.get(cacheKey, ReservationResponse.class);
+        if (cachedReservation != null) {
+            return cachedReservation;
+        }
+
+        ReservationResponse reservation = reservationDatabasePort.findById(reservationId)
                 .map(ReservationResponse::fromEntity)
                 .orElseThrow(() -> new NotFoundException("Reservation not found"));
+
+        cachePort.save(cacheKey, reservation);
+
+        return reservation;
     }
 
     @Override
     public Page<ReservationResponse> findAllByUser(Long userId, PageRequest pageRequest) {
-        return reservationDatabasePort.findAllByUserId(userId, pageRequest)
+        String cacheKey = "reservations:user:" + userId + ":page:" + pageRequest.getPageNumber();
+
+        CachedPage<ReservationResponse> cachedPage = cachePort.get(cacheKey, CachedPage.class);
+        if (cachedPage != null) {
+            return cachedPage.toPage();
+        }
+
+        Page<ReservationResponse> reservations = reservationDatabasePort.findAllByUserId(userId, pageRequest)
                 .map(ReservationResponse::fromEntity);
+
+        cachePort.save(cacheKey, new CachedPage<>(reservations));
+
+        return reservations;
     }
 
     @Override
@@ -97,6 +127,9 @@ public class ReservationUseCaseImpl implements ReservationUseCase {
             bookEntity.setTotalAvailable(bookEntity.getTotalAvailable() + reservationItemEntity.getQuantity());
             bookUseCase.save(bookEntity);
         }
+
+        cachePort.delete("reservation:" + reservationId);
+        cachePort.delete("reservations:user:" + reservationEntity.getUser().getId() + ":page:*");
 
         log.info("Canceled the reservation id {}", reservationId);
     }
@@ -140,11 +173,12 @@ public class ReservationUseCaseImpl implements ReservationUseCase {
 
     private ReservationEntity createInitialReservation(UserEntity userEntity) {
         LocalDateTime timeNow = LocalDateTime.now();
+        int daysToExpireReservation = reservationProperties.getExpirationTime();
         return ReservationEntity.builder()
                 .user(userEntity)
                 .status(ReservationStatusEnum.PENDING)
                 .createdAt(timeNow)
-                .expiresAt(timeNow.plusDays(DAYS_TO_EXPIRE_RESERVATION))
+                .expiresAt(timeNow.plusDays(daysToExpireReservation))
                 .build();
     }
 
