@@ -13,6 +13,7 @@ services:
       - DATASOURCE_URL=jdbc:postgresql://reservation-db:5432/reservation
       - DATASOURCE_USERNAME=postgres
       - DATASOURCE_PASSWORD=postgres
+      - JPA_HIBERNATE_DDL_AUTO=validate
       - QUEUE_HOST=reservation-rabbitmq
       - QUEUE_PORT=5672
       - QUEUE_USERNAME=admin
@@ -33,6 +34,7 @@ services:
       - DATASOURCE_URL=jdbc:postgresql://reservation-db:5432/reservation
       - DATASOURCE_USERNAME=postgres
       - DATASOURCE_PASSWORD=postgres
+      - JPA_HIBERNATE_DDL_AUTO=validate
 
   reservation-notification:
     container_name: reservation-notification
@@ -46,6 +48,7 @@ services:
       - DATASOURCE_URL=jdbc:postgresql://reservation-db:5432/reservation
       - DATASOURCE_USERNAME=postgres
       - DATASOURCE_PASSWORD=postgres
+      - JPA_HIBERNATE_DDL_AUTO=validate
       - QUEUE_HOST=reservation-rabbitmq
       - QUEUE_PORT=5672
       - QUEUE_USERNAME=admin
