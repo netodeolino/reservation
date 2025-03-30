@@ -152,6 +152,10 @@ public class ReservationUseCaseImpl implements ReservationUseCase {
         reservationEntity.setPickedUpAt(LocalDateTime.now());
 
         ReservationEntity savedReservationEntity = reservationDatabasePort.save(reservationEntity);
+
+        cachePort.delete("reservation:" + reservationId);
+        cachePort.delete("reservations:user:" + reservationEntity.getUser().getId() + ":page:*");
+
         return ReservationResponse.fromEntity(savedReservationEntity);
     }
 
