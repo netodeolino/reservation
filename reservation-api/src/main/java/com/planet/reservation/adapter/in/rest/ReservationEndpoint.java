@@ -38,10 +38,12 @@ public class ReservationEndpoint {
     public ResponseEntity<ApiResponse<ReservationResponse>> findAllByUser(
             @PathVariable(name = "userId") Long userId,
             @RequestParam(name = "page", defaultValue = "0") Integer page,
-            @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize
+            @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize,
+            @RequestParam(name = "allStatus", defaultValue = "false") Boolean allStatus
     ) {
-        Page<ReservationResponse> reservationResponsePage = reservationUseCase.findAllByUser(userId, PageRequest.of(page, pageSize));
-        return ResponseEntity.ok(new ApiResponse<>(HttpStatus.OK.value(), HttpStatus.OK.name(), reservationResponsePage.getContent(), PaginationResponse.fromPage(reservationResponsePage)));
+        Page<ReservationResponse> reservationResponsePage = reservationUseCase.findAllByUser(userId, allStatus, PageRequest.of(page, pageSize));
+        return ResponseEntity.ok(new ApiResponse<>(
+                HttpStatus.OK.value(), HttpStatus.OK.name(), reservationResponsePage.getContent(), PaginationResponse.fromPage(reservationResponsePage)));
     }
 
     @DeleteMapping("/{reservationId}")

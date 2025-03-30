@@ -20,7 +20,6 @@ The reservation-batch microservice periodically runs batch executions to update 
 - Build and run: Maven, Docker, scripts `.sh` (unix) and `.bat` (windows)
 
 ## How to run
-
 #### Requirements: Java 21, Docker, Docker Compose
 
 Steps:
@@ -29,8 +28,10 @@ Steps:
 
 The script will build all projects and then call docker-compose to build the images and execute all the services.
 
-## Endpoints (with examples)
+## Reservation logic
+To ensure data consistency I placed the logic inside a transaction. Furthermore, to avoid possible concurrency issues I used the optimistic locking strategy.
 
+## Endpoints (with examples)
 Create a reservation
 ```
 curl --request POST \
@@ -56,7 +57,7 @@ curl --request GET \
 Find all reservation from an user
 ```
 curl --request GET \
-  --url 'http://localhost:8080/reservations/user/1'
+  --url 'http://localhost:8080/reservations/user/1?allStatus=false'
 ```
 
 Pick up a reservation

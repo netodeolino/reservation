@@ -78,7 +78,7 @@ public class ReservationUseCaseImpl implements ReservationUseCase {
     }
 
     @Override
-    public Page<ReservationResponse> findAllByUser(Long userId, PageRequest pageRequest) {
+    public Page<ReservationResponse> findAllByUser(Long userId, Boolean allStatus, PageRequest pageRequest) {
         String cacheKey = "reservations:user:" + userId + ":page:" + pageRequest.getPageNumber();
 
         CachedPage<ReservationResponse> cachedPage = cachePort.get(cacheKey, CachedPage.class);
@@ -86,8 +86,7 @@ public class ReservationUseCaseImpl implements ReservationUseCase {
             return cachedPage.toPage();
         }
 
-        Page<ReservationResponse> reservations = reservationDatabasePort.findAllByUserId(userId, pageRequest)
-                .map(ReservationResponse::fromEntity);
+        Page<ReservationResponse> reservations = getReservationResponsePage(userId, allStatus, pageRequest);
 
         cachePort.save(cacheKey, new CachedPage<>(reservations));
 
@@ -206,6 +205,17 @@ public class ReservationUseCaseImpl implements ReservationUseCase {
     private void updateBookAvailability(BookEntity bookEntity, int quantity) {
         bookEntity.setTotalAvailable(bookEntity.getTotalAvailable() - quantity);
         bookUseCase.save(bookEntity);
+    }
+
+    private Page<ReservationResponse> getReservationResponsePage(Long userId, Boolean allStatus, PageRequest pageRequest) {
+        if (allStatus) {
+            return reservationDatabasePort.findAllByUserId(userId, pageRequest)
+                    .map(ReservationResponse::fromEntity);
+        }
+
+        List<String> validStatus = List.of(ReservationStatusEnum.CONFIRMED.name(), ReservationStatusEnum.PENDING.name());
+        return reservationDatabasePort.findAllByUserIdAndStatusIn(userId, validStatus, pageRequest)
+                .map(ReservationResponse::fromEntity);
     }
 
     private ReservationItemEntity buildReservationItem(BookEntity bookEntity, ReservationEntity reservation, int quantity) {

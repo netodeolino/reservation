@@ -108,7 +108,7 @@ class ReservationUseCaseImplTest {
 
         when(cachePort.get(cacheKey, CachedPage.class)).thenReturn(cachedPage);
 
-        Page<ReservationResponse> response = reservationUseCase.findAllByUser(userId, pageRequest);
+        Page<ReservationResponse> response = reservationUseCase.findAllByUser(userId, true, pageRequest);
 
         assertFalse(response.isEmpty());
         verify(reservationDatabasePort, never()).findAllByUserId(anyLong(), any());
@@ -125,7 +125,7 @@ class ReservationUseCaseImplTest {
         when(cachePort.get(cacheKey, CachedPage.class)).thenReturn(null);
         when(reservationDatabasePort.findAllByUserId(userId, pageRequest)).thenReturn(dbResponse);
 
-        Page<ReservationResponse> response = reservationUseCase.findAllByUser(userId, pageRequest);
+        Page<ReservationResponse> response = reservationUseCase.findAllByUser(userId, true, pageRequest);
 
         assertFalse(response.isEmpty());
         verify(cachePort).save(eq(cacheKey), any(CachedPage.class));
