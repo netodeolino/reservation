@@ -1,18 +1,56 @@
-version: '2'
-
 services:
-  #reservation-api:
-  #  container_name: reservation-api
-  #  build:
-  #    context: reservation-api
-  #  depends_on:
-  #    - reservation-db
-  #  environment:
-  #    - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/reservation
-  #    - SPRING_DATASOURCE_USERNAME=postgres
-  #    - SPRING_DATASOURCE_PASSWORD=postgres
-  #    - SPRING_JPA_HIBERNATE_DDL_AUTO=update
-          
+  reservation-api:
+    container_name: reservation-api
+    build:
+      context: reservation-api
+    ports:
+      - "8080:8080"
+    depends_on:
+      - reservation-db
+      - reservation-rabbitmq
+      - reservation-redis
+    environment:
+      - DATASOURCE_URL=jdbc:postgresql://reservation-db:5432/reservation
+      - DATASOURCE_USERNAME=postgres
+      - DATASOURCE_PASSWORD=postgres
+      - QUEUE_HOST=reservation-rabbitmq
+      - QUEUE_PORT=5672
+      - QUEUE_USERNAME=admin
+      - QUEUE_PASSWORD=admin
+      - CACHE_HOST=reservation-redis
+      - CACHE_PORT=6379
+      - CACHE_PASSWORD=admin
+
+  reservation-batch:
+    container_name: reservation-batch
+    build:
+      context: reservation-batch
+    depends_on:
+      - reservation-db
+      - reservation-rabbitmq
+      - reservation-redis
+    environment:
+      - DATASOURCE_URL=jdbc:postgresql://reservation-db:5432/reservation
+      - DATASOURCE_USERNAME=postgres
+      - DATASOURCE_PASSWORD=postgres
+
+  reservation-notification:
+    container_name: reservation-notification
+    build:
+      context: reservation-notification
+    depends_on:
+      - reservation-db
+      - reservation-rabbitmq
+      - reservation-redis
+    environment:
+      - DATASOURCE_URL=jdbc:postgresql://reservation-db:5432/reservation
+      - DATASOURCE_USERNAME=postgres
+      - DATASOURCE_PASSWORD=postgres
+      - QUEUE_HOST=reservation-rabbitmq
+      - QUEUE_PORT=5672
+      - QUEUE_USERNAME=admin
+      - QUEUE_PASSWORD=admin
+
   reservation-db:
     container_name: reservation-db
     image: 'postgres:17.4-alpine'
@@ -25,7 +63,7 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U user -d postgres"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d reservation"]
       interval: 10s
       timeout: 5s
       retries: 5

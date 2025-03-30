@@ -3,9 +3,9 @@ spring:
     name: reservation-api
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/reservation
-    username: postgres
-    password: postgres
+    url: ${DATASOURCE_URL:jdbc:postgresql://localhost:5432/reservation}
+    username: ${DATASOURCE_USERNAME:postgres}
+    password: ${DATASOURCE_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -13,16 +13,17 @@ spring:
       ddl-auto: update
 
   rabbitmq:
-    host: localhost
-    port: 5672
-    username: admin
-    password: admin
+    host: ${QUEUE_HOST:localhost}
+    port: ${QUEUE_PORT:5672}
+    username: ${QUEUE_USERNAME:admin}
+    password: ${QUEUE_PASSWORD:admin}
 
-  redis:
-    host: localhost
-    port: 6379
-    password: admin
-    timeout: 60000
+  data:
+    redis:
+      host: ${CACHE_HOST:localhost}
+      port: ${CACHE_PORT:6379}
+      password: ${CACHE_PASSWORD:admin}
+      timeout: 60000
 
 app:
   queue:

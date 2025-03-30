@@ -3,9 +3,9 @@ spring:
     name: reservation-notification
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/reservation
-    username: postgres
-    password: postgres
+    url: ${DATASOURCE_URL:jdbc:postgresql://localhost:5432/reservation}
+    username: ${DATASOURCE_USERNAME:postgres}
+    password: ${DATASOURCE_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -13,10 +13,10 @@ spring:
       ddl-auto: update
 
   rabbitmq:
-    host: localhost
-    port: 5672
-    username: admin
-    password: admin
+    host: ${QUEUE_HOST:localhost}
+    port: ${QUEUE_PORT:5672}
+    username: ${QUEUE_USERNAME:admin}
+    password: ${QUEUE_PASSWORD:admin}
 
 app:
   queue:

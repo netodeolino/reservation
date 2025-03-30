@@ -3,9 +3,9 @@ spring:
     name: reservation-batch
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/reservation
-    username: postgres
-    password: postgres
+    url: ${DATASOURCE_URL:jdbc:postgresql://localhost:5432/reservation}
+    username: ${DATASOURCE_USERNAME:postgres}
+    password: ${DATASOURCE_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -15,5 +15,5 @@ spring:
 app:
   scheduling:
     notPickedUpReservationFixed:
-      delayTime: 5000
+      delayTime: 300000
       expirationTime: 7
