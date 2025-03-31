@@ -6,6 +6,8 @@
 ### Reservation-api
 The reservation-api microservice handles HTTP REST requests and enforces core business rules. It interacts with the database for data persistence, uses Redis for caching, and communicates with RabbitMQ to asynchronously send information to the notification service.
 
+This service follows a hexagonal architecture to effectively manage communication with multiple external components and maintain a well-structured business logic.
+
 ### Reservation-notification
 The reservation-notification microservice receives messages via RabbitMQ and simulates the sending of notifications through multiple channels, such as email and SMS, with the flexibility to support additional channels if needed. It's main responsibility is to inform users about changes in the reservation.
 
@@ -30,6 +32,11 @@ The script will build all projects and then call docker-compose to build the ima
 
 ## Reservation logic
 To ensure data consistency I placed the logic inside a transaction. Furthermore, to avoid possible concurrency issues I used the optimistic locking strategy.
+
+## Database
+The database is automatically created using the `/infrastructure/reservation-db-schema.sql` when you run the application by using the script `build-and-run.sh`. See the `docker-compose.yml` file for more details. If you want to run the database by your own use the .sql file to create the tables, foreign keys, unique constraints, and indexes.
+
+> The application will validate the database model before start!
 
 ## Endpoints (with examples)
 Create a reservation
@@ -72,8 +79,10 @@ curl --request DELETE \
   --url http://localhost:8080/reservations/1
 ```
 
+> You can use also the OpenAPI UI: http://localhost:8080/swagger-ui/index.html
+
 ## Important info
 1. The database is generated already with two books and two users to make it easy to start to use :)
-2. Unit tests were implemented for the services, along with integration tests for the database. However, due to time constraints, only unit tests were added for cache and queue communications. Ideally, integration tests should also be included for these components using technologies like [Testcontainers](https://testcontainers.com).
-3. I decided not to use Lombok in the project by my own choice, but it's quite common to use this type of library nowadays.
+2. Unit tests were implemented for the services, along with integration tests for the database using an in-memory database. However, due to time constraints, only unit tests were added for cache and queue communications. Ideally, integration tests should also be included for these components using technologies like [Testcontainers](https://testcontainers.com).
+3. I decided not to use [Lombok](https://projectlombok.org) in the project by my own choice, but it's quite common to use this type of library nowadays.
 4. There are many other features that could have been added to this project, such as [Flyway](https://www.red-gate.com/products/flyway/), additional microservices like Catalog (using ELK, MongoDB, or another data source), Authentication, User, Payment, and even an API Gateway. However, I believe these go beyond the scope of the challenge and would require significantly more time to implement.

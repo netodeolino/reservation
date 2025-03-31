@@ -28,8 +28,6 @@ services:
       context: reservation-batch
     depends_on:
       - reservation-db
-      - reservation-rabbitmq
-      - reservation-redis
     environment:
       - DATASOURCE_URL=jdbc:postgresql://reservation-db:5432/reservation
       - DATASOURCE_USERNAME=postgres
@@ -43,7 +41,6 @@ services:
     depends_on:
       - reservation-db
       - reservation-rabbitmq
-      - reservation-redis
     environment:
       - DATASOURCE_URL=jdbc:postgresql://reservation-db:5432/reservation
       - DATASOURCE_USERNAME=postgres
