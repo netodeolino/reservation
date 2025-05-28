@@ -10,7 +10,7 @@
 		<relativePath/>
 	</parent>
 
-	<groupId>com.planet</groupId>
+	<groupId>com.pt</groupId>
 	<artifactId>reservation-notification</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>reservation-notification</name>

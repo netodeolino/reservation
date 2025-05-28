@@ -10,7 +10,7 @@
 		<relativePath/>
 	</parent>
 
-	<groupId>com.planet</groupId>
+	<groupId>com.pt</groupId>
 	<artifactId>reservation-api</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>reservation-api</name>

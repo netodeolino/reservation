@@ -1,4 +1,4 @@
-# Library Book Reservation Service
+# Reservation System
 
 ## Architecture
 ![Architecture](docs/images/architecture.png)
@@ -80,9 +80,3 @@ curl --request DELETE \
 ```
 
 > You can use also the OpenAPI UI: http://localhost:8080/swagger-ui/index.html
-
-## Important info
-1. The database is generated already with two books and two users to make it easy to start to use :)
-2. Unit tests were implemented for the services, along with integration tests for the database using an in-memory database. However, due to time constraints, only unit tests were added for cache and queue communications. Ideally, integration tests should also be included for these components using technologies like [Testcontainers](https://testcontainers.com).
-3. I decided not to use [Lombok](https://projectlombok.org) in the project by my own choice, but it's quite common to use this type of library nowadays.
-4. There are many other features that could have been added to this project, such as [Flyway](https://www.red-gate.com/products/flyway/), additional microservices like Catalog (using ELK, MongoDB, or another data source), Authentication, User, Payment, and even an API Gateway. However, I believe these go beyond the scope of the challenge and would require significantly more time to implement.
